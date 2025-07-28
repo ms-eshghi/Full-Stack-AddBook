@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import "./App.css"
+import React,{ useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./App.css";
 
 function App() {
   const [name, setName] = useState("");
@@ -20,15 +20,24 @@ function App() {
 
   return (
     <form onSubmit={handleSubmit}>
-       <h1>books</h1>
+      <h1>books</h1>
       <label htmlFor="name">Name: </label>
       <input id="name" value={name} onChange={(e) => setName(e.target.value)} />
-        <br />
+      <br />
       <label htmlFor="author">Author: </label>
-      <input id="author" value={author} onChange={(e) => setAuthor(e.target.value)} />
-        <br />
-     <label htmlFor="pages">Pages: </label>
-      <input id="pages" type="number" value={pages} onChange={(e) => setPages(+e.target.value)} />
+      <input
+        id="author"
+        value={author}
+        onChange={(e) => setAuthor(e.target.value)}
+      />
+      <br />
+      <label htmlFor="pages">Pages: </label>
+      <input
+        id="pages"
+        type="number"
+        value={pages}
+        onChange={(e) => setPages(+e.target.value)}
+      />
       <br />
       <input id="submit" type="submit" value="Submit" />
     </form>
