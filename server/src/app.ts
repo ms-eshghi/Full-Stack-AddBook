@@ -1,7 +1,7 @@
 import express from "express";
 import cors, { CorsOptions } from "cors";
 import mongoose from "mongoose";
-import Books from "./models/Books";
+import Books from "./models/books";
 import path from "path";
 
 const app = express();
