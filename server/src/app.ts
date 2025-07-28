@@ -1,9 +1,9 @@
 import express from "express";
 import cors, { CorsOptions } from "cors";
 import mongoose from "mongoose";
-import Book from "./models/Book.js";
+import Book from "./Books";
 import path from "path";
-import { fileURLToPath } from "url";
+
 
 const app = express();
 const PORT = 1234;
@@ -16,8 +16,7 @@ if (process.env.NODE_ENV === "development") {
     optionsSuccessStatus:200
   }
   app.use(cors(corsOption ));
-} 
-if (process.env.NODE_ENV === "production") {
+} else if (process.env.NODE_ENV === "production") {
 
   app.use(express.static(path.resolve('../..','client','build')));
 
@@ -25,6 +24,7 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.resolve('../..','client','build','index.html'));
   });
 }
+
 
 mongoose.connect("mongodb://localhost:27017/books");
 
@@ -42,7 +42,12 @@ app.get("/api/book/:name", async (req, res) => {
   res.json(book);
 });
 
-
+if (process.env.NODE_ENV === 'test') {
+    app.post('/api/test/reset', async (req, res) => {
+        await Book.deleteMany({});
+        res.status(204).end();
+    });
+}
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
