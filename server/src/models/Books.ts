@@ -6,4 +6,4 @@ const BookSchema = new mongoose.Schema({
   pages: Number,
 });
 
-export default mongoose.model("Book", BookSchema);
+export default mongoose.model("Books", BookSchema);
