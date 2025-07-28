@@ -9,6 +9,8 @@ const PORT = 1234;
 
 app.use(express.json());
 
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/books');
+
 if (process.env.NODE_ENV === "development") {
   const corsOption: CorsOptions = {
     origin: "http://localhost:3000",
@@ -23,7 +25,7 @@ if (process.env.NODE_ENV === "development") {
   });
 }
 
-mongoose.connect("mongodb://localhost:27017/books");
+
 
 app.post("/api/book", async (req, res) => {
   const { name, author, pages } = req.body;
