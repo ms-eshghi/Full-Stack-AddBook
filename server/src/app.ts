@@ -1,25 +1,22 @@
 import express from "express";
-import cors, { CorsOptions } from "cors";
+import cors from "cors";
 import mongoose from "mongoose";
-import Books from "./models/books";
 import path from "path";
+import Books from "./models/books";
 
 const app = express();
+const router = express.Router();
 const PORT = process.env.PORT || 1234;
 
-
+// Middleware
 app.use(express.json());
 
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/books")
-.then(async () => {
+  .then(async () => {
     console.log("Connected to MongoDB");
-
-    // Ensure 'books' collection exists
     const db = mongoose.connection.db;
-    if (!db) {
-      console.error("Database not initialized");
-      return;
-    }
+    if (!db) return console.error("No DB connection");
 
     const collections = await db.listCollections({ name: "books" }).toArray();
     if (collections.length === 0) {
@@ -27,10 +24,11 @@ mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/books")
       console.log("Created books collection");
     }
   })
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .catch(err => console.error("Mongo error:", err));
 
+// CORS for development
 if (process.env.NODE_ENV === "development") {
-  const corsOptions: CorsOptions = {
+  const corsOptions = {
     origin: "http://localhost:3000",
     credentials: true,
     optionsSuccessStatus: 200,
@@ -38,6 +36,7 @@ if (process.env.NODE_ENV === "development") {
   app.use(cors(corsOptions));
 }
 
+// Serve static files in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.resolve(__dirname, "../client/build")));
 
@@ -46,27 +45,29 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-
-app.post("/api/book", async (req, res) => {
+// Define routes WITHOUT '/api' prefix here because router is mounted on '/api'
+router.post("/book", async (req, res) => {
   const { name, author, pages } = req.body;
   const book = new Books({ name, author, pages });
   await book.save();
   res.json(book);
 });
 
-app.get("/api/book/:name", async (req, res) => {
-  const name = req.params.name;
-  const book = await Books.findOne({ name });
+router.get("/book/:name", async (req, res) => {
+  const book = await Books.findOne({ name: req.params.name });
   if (!book) return res.status(404).send("Not found");
   res.json(book);
 });
 
 if (process.env.NODE_ENV === "test") {
-  app.post("/api/test/reset", async (req, res) => {
+  router.post("/test/reset", async (req, res) => {
     await Books.deleteMany({});
     res.status(204).end();
   });
 }
+
+// Mount the router under '/api'
+app.use('/api', router);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

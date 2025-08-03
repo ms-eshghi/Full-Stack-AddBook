@@ -6,6 +6,6 @@ const BookSchema = new mongoose.Schema({
   pages: Number,
 });
 
-const Books = mongoose.model("books", BookSchema); // explicitly use "books"
+const Books = mongoose.model("books", BookSchema);
 
 export default Books;
