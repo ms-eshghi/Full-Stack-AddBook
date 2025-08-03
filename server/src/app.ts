@@ -14,17 +14,23 @@ app.use(express.json());
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/books")
   .then(async () => {
-    console.log("Connected to MongoDB");
-    const db = mongoose.connection.db;
-    if (!db) return console.error("No DB connection");
+    console.log("✅ Connected to MongoDB");
+    const db = mongoose.connection.db!; // non-null assertion
 
     const collections = await db.listCollections({ name: "books" }).toArray();
     if (collections.length === 0) {
       await db.createCollection("books");
-      console.log("Created books collection");
+      console.log("Created 'books' collection");
+    } else {
+      console.log("'books' collection already exists");
+    }
+
+    if (process.env.NODE_ENV === "test") {
+      await db.collection("books").deleteMany({});
+      console.log("Cleared 'books' collection for test");
     }
   })
-  .catch(err => console.error("Mongo error:", err));
+  .catch(err => console.error("MongoDB connection error:", err));
 
 // CORS for development
 if (process.env.NODE_ENV === "development") {
@@ -59,12 +65,7 @@ router.get("/book/:name", async (req, res) => {
   res.json(book);
 });
 
-if (process.env.NODE_ENV === "test") {
-  router.post("/test/reset", async (req, res) => {
-    await Books.deleteMany({});
-    res.status(204).end();
-  });
-}
+
 
 // Mount the router under '/api'
 app.use('/api', router);
